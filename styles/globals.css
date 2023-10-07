@@ -40,9 +40,13 @@ html:not([dir=rtl]) .wrapper {
 .form-control {
     border-color: #e3e3e3;
     box-shadow: none;
-    font-size: 15px;
-    height: 44px;
+    font-size: 16px;
+    height: 50px;
     line-height: 2;
+}
+
+.form-label {
+    font-weight: bold;
 }
 
 .submit-section .submit-btn {
@@ -52,13 +56,52 @@ html:not([dir=rtl]) .wrapper {
     border-radius: 50px;
     padding: 10px 20px;
 }
+.add-btn {
+    color: #ffffff;
+    font-weight: 500;
+    min-width: 140px;
+    border-radius: 50px;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+}
+
+button {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    outline: none;
+    border: 0;
+    vertical-align: middle;
+    text-decoration: none;
+    font-size: inherit;
+    font-family: inherit;
+}
+button.add-btn,
+button.submit-btn{
+    font-weight: 600;
+    background: #206bd5;
+    padding: .5rem 0.8rem;
+    border: 2px solid #0556cb;
+    transform-style: preserve-3d;
+    transition: transform 150ms cubic-bezier(0, 0, 0.58, 1), background 150ms cubic-bezier(0, 0, 0.58, 1);
+}
+button.add-btn:hover,
+button.submit-btn:hover{
+    background: #3589fa;
+    transform: translate(0, 0.15em);
+}
+button.add-btn:active,
+button.submit-btn:active{
+    background: #3589fa;
+    transform: translate(0em, 0.35em);
+}
 
 .modal-header .btn-close {
-    background-color: #e17070;
+    background-color: #7fc7fd;
     border-radius: 50%;
     color: #fff !important;
-    font-size: 12px;
-    height: 30px;
+    font-size: 16px;
+    height: 40px;
     line-height: 20px;
     margin: 0 !important;
     opacity: 1;
@@ -66,9 +109,9 @@ html:not([dir=rtl]) .wrapper {
     position: absolute;
     right: 10px;
     top: 10px;
-    width: 30px;
+    width: 40px;
     z-index: 99;
-    border-color: #e17070;
+    border-color: #2965ce;
     border-style: none;
 }
 

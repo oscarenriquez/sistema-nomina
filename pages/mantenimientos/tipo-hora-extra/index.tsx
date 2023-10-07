@@ -3,11 +3,14 @@ import type { NextPage } from "next";
 import {Container, Table, Row, Col, Button, Modal, DropdownButton, Dropdown, Form} from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faEllipsisV, faAdd, faEdit, faTrash
+  faEllipsisV, faAdd, faEdit, faTrash, faSave
 } from "@fortawesome/free-solid-svg-icons";
-import React from "react";
+import React, {useState} from "react";
 import styles from './TipoHoraExtra.module.css'
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
 
+const MySwal = withReactContent(Swal);
 const datos = [
   {
     id: 1,
@@ -56,6 +59,40 @@ const MenuDropdown = (props) => {
 }
 
 const CreateOrEditModal = (props) => {
+  const formData = { nombre: '', coeficiente: 0};
+  const formValidation = { nombre: false, coeficiente: false};
+  const [requestBody, setRequestBody] = useState(formData);
+  const [validation, setValidation] = useState(formValidation);
+  
+  const inputChangeHandler = (event) => {
+    const {name, value} = event.target
+    setRequestBody({...requestBody, [name]: value})
+  }
+  const submitForm = (event) => {
+    event.preventDefault();
+    if (!requestBody.coeficiente && requestBody.coeficiente === 0) {
+      setValidation({...validation, coeficiente: true});
+      return;
+    }
+    if (!requestBody.nombre.trim()) {
+      setValidation({...validation, nombre: true});
+      return;
+    }
+    
+    setValidation(formValidation);
+  
+    try {
+      props.submitRecord(requestBody);
+      MySwal.fire({
+        key: 'successCreation',
+        title: '¡Configuración Creada!',
+        icon: 'success'
+      });
+    } catch (e) {
+     console.log(e);
+    }
+  }
+  
   return (
     <Modal
       {...props}
@@ -68,18 +105,24 @@ const CreateOrEditModal = (props) => {
           {!!props.isEditing ? 'Editar Hora Extra' : 'Agregar Hora Extra'}
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body className={'p-4'}>
-        <Form>
-          <Form.Group className="mb-3" controlId="formNombre">
-            <Form.Label>Nombre *</Form.Label>
-            <Form.Control type="text" placeholder="Ingresa Nombre o Descripción" required={true} />
+      <Modal.Body className={'p-5'}>
+        <Form onSubmit={submitForm}>
+          <Form.Group className="mb-4" controlId="nombre">
+            <Form.Label>Nombre <span className='text-danger'>*</span></Form.Label>
+            <Form.Control name='nombre' size={'lg'} type="text" placeholder="Ingresa Nombre o Descripción" required={true} onChange={(event) => inputChangeHandler(event)}/>
+            {formValidation.nombre && <Form.Text className='text-danger'>El Nombre es un valor requerido para guardar este registro.</Form.Text>}
+            
           </Form.Group>
-          <Form.Group className="mb-3" controlId="formValor">
-            <Form.Label>Tasa (%) *</Form.Label>
-            <Form.Control type="number" min={1} max={999} placeholder="Ingresa tasa de pago para esta hora" required={true} />
+          <Form.Group className="mb-4" controlId="coeficiente">
+            <Form.Label>Tasa (%) <span className='text-danger'>*</span></Form.Label>
+            <Form.Control name='coeficiente' size={'lg'} type="number" min={1} max={999} placeholder="Ingresa tasa de pago para esta hora" required={true} onChange={(event) => inputChangeHandler(event)}/>
+            {formValidation.coeficiente && <Form.Text className='text-danger'>El valor de tasa es requerido para guardar este registro.</Form.Text>}
           </Form.Group>
           <div className="submit-section pt-4 text-center">
             <Button variant="primary" type="submit" size={'lg'} className={'submit-btn'}>
+              <FontAwesomeIcon
+                icon={faSave}
+                style={{fontSize: "18px", marginRight: "10px", color: "white"}} />
               {!!props.isEditing ? 'Actualizar' : 'Crear'}
             </Button>
           </div>
@@ -99,8 +142,24 @@ const Index: NextPage = () => {
     setModalShow(true);
   }
   
-  const eliminar = (id) => {
+  const create = (requestBody) => {
+    datos.push({...requestBody, id : datos.length + 1});
+    setModalShow(false);
+  }
   
+  const eliminar = (id) => {
+    MySwal.fire({
+      titleText: '¡Atención!',
+      text: '¿Está seguro de eliminar esta configuración?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      denyButtonText: `Cancelar`,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        MySwal.fire('Eliminado!', '', 'success')
+      }
+    })
   }
   
   return (
@@ -108,27 +167,25 @@ const Index: NextPage = () => {
       <header className="py-4 mb-2">
         <Container>
           <Row>
-            <Col xs={12}>
+            <Col>
               <h1>Configuración de Pago de Horas Extras</h1>
+            </Col>
+            <Col xs={3}>
+              <Button className="btn btn-primary float-end add-btn" onClick={() => {
+                setModalShow(true)
+                setIsEditing(false)
+              }}>
+                <FontAwesomeIcon
+                  icon={faAdd}
+                  style={{fontSize: "18px", color: "white", marginRight: 10}}
+                />
+                Agregar
+              </Button>
             </Col>
           </Row>
         </Container>
       </header>
       <Container>
-        <Row className="py-2 justify-content-end">
-          <Col xs={3}>
-            <Button className="btn btn-primary float-end" onClick={() => {
-              setModalShow(true)
-              setIsEditing(false)
-            }}>
-              <FontAwesomeIcon
-                icon={faAdd}
-                style={{fontSize: "18px", color: "white", marginRight: 10}}
-              />
-              Crear
-            </Button>
-          </Col>
-        </Row>
         <Row >
           <Col xs={12}>
             <Table striped responsive bordered hover className={styles.table}>
@@ -161,6 +218,7 @@ const Index: NextPage = () => {
         show={modalShow}
         isEditing={isEditing}
         onHide={() => setModalShow(false)}
+        submitRecord={(requestBody) => create(requestBody)}
       />
     </Container>
   );
